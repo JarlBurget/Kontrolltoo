@@ -5,7 +5,6 @@ const App = () => {
   return (
     <>
       <Header />
-      <h1>Food Order App</h1>
       <Meals /> 
     </>
   );
