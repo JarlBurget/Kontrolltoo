@@ -6,7 +6,6 @@ const MealItem = (props) => {
   const cartCtx = useContext(CartContext);
   
   const handleAddToCart = () => {
-    // Pass the complete meal object including image and description
     cartCtx.addItem({
       id: props.meal.id,
       name: props.meal.name,

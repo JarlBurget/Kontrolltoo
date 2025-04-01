@@ -1,6 +1,5 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useReducer } from "react";
 
-// Create the context with default values
 const CartContext = createContext({
   items: [],
   addItem: (item) => {},
@@ -8,47 +7,61 @@ const CartContext = createContext({
   clearCart: () => {}
 });
 
-// Export the provider component
+const cartReducer = (state, action) => {
+  if (action.type === 'ADD_ITEM') {
+    const existingItemIndex = state.findIndex(
+      (item) => item.id === action.item.id
+    );
+
+    const updatedItems = [...state];
+
+    if (existingItemIndex !== -1) {
+      const updatedItem = {
+        ...updatedItems[existingItemIndex],
+        quantity: updatedItems[existingItemIndex].quantity + 1
+      };
+      
+      updatedItems[existingItemIndex] = updatedItem;
+      
+      console.log(`Increased quantity of ${action.item.name} to ${updatedItem.quantity}`);
+      console.log(`Item details: ${action.item.description}`);
+      console.log(`Image: ${action.item.image}`);
+    } else {
+      updatedItems.push({ ...action.item, quantity: 1 });
+      
+      console.log(`Added new item: ${action.item.name} with quantity 1`);
+      console.log(`Item details: ${action.item.description}`);
+      console.log(`Image: ${action.item.image}`);
+    }
+
+    console.log("Current cart:", updatedItems);
+    return updatedItems;
+  }
+
+  if (action.type === 'REMOVE_ITEM') {
+    return state.filter(item => item.id !== action.id);
+  }
+
+  if (action.type === 'CLEAR_CART') {
+    return [];
+  }
+
+  return state;
+};
+
 export const CartContextProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, dispatchCartAction] = useReducer(cartReducer, []);
 
   const addItemToCartHandler = (item) => {
-    setCartItems((prevItems) => {
-      // Check if the item already exists in the cart
-      const existingItemIndex = prevItems.findIndex(
-        (cartItem) => cartItem.id === item.id
-      );
-
-      // Copy the previous items array
-      const updatedItems = [...prevItems];
-
-      if (existingItemIndex !== -1) {
-        // If item exists, increment its quantity
-        const existingItem = {...updatedItems[existingItemIndex]};
-        existingItem.quantity += 1;
-        updatedItems[existingItemIndex] = existingItem;
-        console.log(`Increased quantity of ${item.name} to ${existingItem.quantity}`);
-        console.log(`Item details: ${item.description}`);
-        console.log(`Image: ${item.image}`);
-      } else {
-        // If item doesn't exist, add it with Quantity of 1
-        updatedItems.push({ ...item, quantity: 1 });
-        console.log(`Added new item: ${item.name} with quantity 1`);
-        console.log(`Item details: ${item.description}`);
-        console.log(`Image: ${item.image}`);
-      }
-
-      console.log("Current cart:", updatedItems);
-      return updatedItems;
-    });
+    dispatchCartAction({ type: 'ADD_ITEM', item: item });
   };
 
   const removeItemFromCartHandler = (id) => {
-    setCartItems((prevItems) => prevItems.filter(item => item.id !== id));
+    dispatchCartAction({ type: 'REMOVE_ITEM', id: id });
   };
 
   const clearCartHandler = () => {
-    setCartItems([]);
+    dispatchCartAction({ type: 'CLEAR_CART' });
   };
 
   const contextValue = {
@@ -65,5 +78,4 @@ export const CartContextProvider = ({ children }) => {
   );
 };
 
-// Export the context as default
 export default CartContext;
