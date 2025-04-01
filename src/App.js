@@ -1,13 +1,15 @@
-import Header from "./components/Header";
-import Meals from "./components/Meals"; 
+import React from 'react';
+import Header from './components/Header';
+import Meals from './components/Meals';
+import { CartContextProvider } from './store/CartContext';
 
-const App = () => {
+function App() {
   return (
-    <>
+    <CartContextProvider>
       <Header />
-      <Meals /> 
-    </>
+      <Meals />
+    </CartContextProvider>
   );
-};
+}
 
 export default App;
