@@ -1,3 +1,5 @@
+import Button from '../components/UI/Button';
+
 const MealItem = (props) => {
     const number = props.meal.price; 
 
@@ -5,6 +7,10 @@ const MealItem = (props) => {
         style: "currency", 
         currency: "EUR" 
     }).format(number);
+
+    const handleAddToCart = () => {
+        console.log(`${props.meal.name} added to cart!`);
+    };
 
     return (
         <li className="meal-item">
@@ -15,9 +21,9 @@ const MealItem = (props) => {
                     <p className="meal-item-price">{formattedNumber}</p> {}
                     <p className="meal-item-description">{props.meal.description}</p>
                 </div>
-                <div className="meal-item-actions">
-                    <button>Add to Cart</button>
-                </div>
+                <p className="meal-item-actions">
+                    <Button onClick={handleAddToCart}>Add to Cart</Button>
+                </p>
             </article>
         </li>
     );
