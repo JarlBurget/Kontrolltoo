@@ -1,38 +1,34 @@
-import React, { useContext } from 'react';
-import Button from './UI/Button';
-import CartContext from '../store/CartContext';
-import logo from '../assets/logo.jpg';
+import logo from '../assets/logo.jpg'
+import Button from './UI/Button'
 
-const Header = () => {
-  const cartCtx = useContext(CartContext);
-  
-  const numberOfCartItems = cartCtx.items.reduce((total, item) => {
-    return total + item.quantity;
-  }, 0);
+import { useContext } from 'react' 
+import CartContext from '../store/CartContext'
 
-  const handleCartClick = () => {
-    console.log('Cart clicked!');
-    console.log('Items in cart:', cartCtx.items);
-    console.log('Total quantity:', numberOfCartItems);
-    
-    cartCtx.items.forEach(item => {
-      console.log(`${item.name}: ${item.quantity} x $${item.price}`);
-    });
-  };
+const Header = ({ onModalOpen}) => {
+    const cartctx = useContext(CartContext);
+    const totalItems = cartctx.items.reduce((sum, item) => sum + item.quantity, 0);
+    console.log(cartctx.items)
+    return (
+        <div>
+            <header id="main-header">
+                <div id="title">
+                    <img src={logo}/>
+                    <h1>React Food Order App</h1>
+                    
+                </div>
+            <nav>
+            <Button 
+            onClick={onModalOpen}
+            textOnly={true}
+            >Cart ({cartctx.items.length})
+            </Button>
 
-  return (
-    <header id="main-header">
-      <div id="title">
-        <img src={logo} alt="Logo" />
-        <h1>React Food Order App</h1>
-      </div>
-      <nav>
-        <Button textOnly={true} onClick={handleCartClick}>
-          Cart ({numberOfCartItems})
-        </Button>
-      </nav>
-    </header>
-  );
-};
+            </nav>
+        </header>
+        <ul id="meals">
+        </ul>
+        </div>
+    )
+}
 
-export default Header;
+export default Header

@@ -4,14 +4,14 @@ import CartContext from '../store/CartContext';
 
 const MealItem = (props) => {
   const cartCtx = useContext(CartContext);
-  
+
   const handleAddToCart = () => {
     cartCtx.addItem({
       id: props.meal.id,
       name: props.meal.name,
       price: props.meal.price,
       description: props.meal.description,
-      image: props.meal.image
+      image: props.meal.image,
     });
   };
 

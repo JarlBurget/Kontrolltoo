@@ -1,74 +1,123 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useReducer, useContext } from "react";
+
+const initialCartState = {
+  items: [],
+  totalAmount: 0,
+  totalItems: 0
+};
 
 const CartContext = createContext({
   items: [],
+  totalAmount: 0,
+  totalItems: 0,
   addItem: (item) => {},
-  removeItem: (id) => {},
-  clearCart: () => {}
+  removeItem: (id, amount = 1) => {},
+  clearCart: () => {},
+  isItemInCart: (id) => false
 });
 
 const cartReducer = (state, action) => {
-  if (action.type === 'ADD_ITEM') {
-    const existingItemIndex = state.findIndex(
-      (item) => item.id === action.item.id
-    );
+  switch (action.type) {
+    case 'ADD_ITEM': {
+      const existingItemIndex = state.items.findIndex(
+        (item) => item.id === action.item.id
+      );
 
-    const updatedItems = [...state];
-
-    if (existingItemIndex !== -1) {
-      const updatedItem = {
-        ...updatedItems[existingItemIndex],
-        quantity: updatedItems[existingItemIndex].quantity + 1
+      let updatedItems;
+      
+      if (existingItemIndex !== -1) {
+        updatedItems = state.items.map((item, index) => 
+          index === existingItemIndex 
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        updatedItems = [...state.items, { ...action.item, quantity: 1 }];
+      }
+      
+      const newTotalItems = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+      const newTotalAmount = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+      return {
+        items: updatedItems,
+        totalItems: newTotalItems,
+        totalAmount: newTotalAmount
       };
-      
-      updatedItems[existingItemIndex] = updatedItem;
-      
-      console.log(`Increased quantity of ${action.item.name} to ${updatedItem.quantity}`);
-      console.log(`Item details: ${action.item.description}`);
-      console.log(`Image: ${action.item.image}`);
-    } else {
-      updatedItems.push({ ...action.item, quantity: 1 });
-      
-      console.log(`Added new item: ${action.item.name} with quantity 1`);
-      console.log(`Item details: ${action.item.description}`);
-      console.log(`Image: ${action.item.image}`);
     }
 
-    console.log("Current cart:", updatedItems);
-    return updatedItems;
-  }
+    case 'REMOVE_ITEM': {
+      const existingItemIndex = state.items.findIndex(
+        (item) => item.id === action.id
+      );
+      
+      if (existingItemIndex === -1) {
+        return state;
+      }
+      
+      const existingItem = state.items[existingItemIndex];
+      const amount = action.amount || 1;
+      
+      let updatedItems;
+      
+      if (existingItem.quantity <= amount) {
+        updatedItems = state.items.filter(item => item.id !== action.id);
+      } else {
+        updatedItems = state.items.map((item) =>
+          item.id === action.id
+            ? { ...item, quantity: item.quantity - amount }
+            : item
+        );
+      }
+      
+      const newTotalItems = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+      const newTotalAmount = updatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      
+      return {
+        items: updatedItems,
+        totalItems: newTotalItems,
+        totalAmount: newTotalAmount
+      };
+    }
 
-  if (action.type === 'REMOVE_ITEM') {
-    return state.filter(item => item.id !== action.id);
+    case 'CLEAR_CART':
+      return initialCartState;
+      
+    default:
+      return state;
   }
-
-  if (action.type === 'CLEAR_CART') {
-    return [];
-  }
-
-  return state;
 };
 
 export const CartContextProvider = ({ children }) => {
-  const [cartItems, dispatchCartAction] = useReducer(cartReducer, []);
+  const [cartState, dispatchCartAction] = useReducer(cartReducer, initialCartState);
 
   const addItemToCartHandler = (item) => {
-    dispatchCartAction({ type: 'ADD_ITEM', item: item });
+    if (!item.price) {
+      console.warn('Item added to cart is missing price property:', item);
+      item.price = 0;
+    }
+    dispatchCartAction({ type: 'ADD_ITEM', item });
   };
 
-  const removeItemFromCartHandler = (id) => {
-    dispatchCartAction({ type: 'REMOVE_ITEM', id: id });
+  const removeItemFromCartHandler = (id, amount = 1) => {
+    dispatchCartAction({ type: 'REMOVE_ITEM', id, amount });
   };
 
   const clearCartHandler = () => {
     dispatchCartAction({ type: 'CLEAR_CART' });
   };
+  
+  const isItemInCartHandler = (id) => {
+    return cartState.items.some(item => item.id === id);
+  };
 
   const contextValue = {
-    items: cartItems,
+    items: cartState.items,
+    totalAmount: cartState.totalAmount,
+    totalItems: cartState.totalItems,
     addItem: addItemToCartHandler,
     removeItem: removeItemFromCartHandler,
-    clearCart: clearCartHandler
+    clearCart: clearCartHandler,
+    isItemInCart: isItemInCartHandler
   };
 
   return (
@@ -76,6 +125,16 @@ export const CartContextProvider = ({ children }) => {
       {children}
     </CartContext.Provider>
   );
+};
+
+export const useCart = () => {
+  const context = useContext(CartContext);
+  
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartContextProvider');
+  }
+  
+  return context;
 };
 
 export default CartContext;
