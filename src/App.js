@@ -20,14 +20,18 @@ const reducer = (state, action) => {
 
 			if (existingItemIndex !== -1) {
 				const updatedItems = [...state.items];
-				updatedItems[existingItemIndex].quantity += 1;
+				updatedItems[existingItemIndex] = {
+					...updatedItems[existingItemIndex],
+					quantity: updatedItems[existingItemIndex].quantity + 1,
+				};
+
 				return { ...state, items: updatedItems };
 			} else {
-				action.item.quantity = 1;
+				const newItem = { ...action.item, quantity: 1 };
 
 				return {
 					...state,
-					items: [...state.items, { ...action.item }],
+					items: [...state.items, newItem],
 				};
 			}
 		case "REMOVE_ITEM":
@@ -51,17 +55,14 @@ const App = () => {
 
 	const addItemToCartHandler = (item) => {
 		dispatchCartAction({ type: "ADD_ITEM", item });
-		console.log("Added item to cart:", item);
 		console.log(cartState.items);
 	};
 	const removeItemFromCartHandler = (id, amount = 1) => {
 		dispatchCartAction({ type: "REMOVE_ITEM", id, amount });
-		console.log("Removed item from cart:", id, amount);
 	};
 
 	const clearCartHandler = () => {
 		dispatchCartAction({ type: "CLEAR_ITEMS" });
-		console.log("Cleared cart items");
 	};
 
 	const cartContextValue = {
@@ -79,6 +80,12 @@ const App = () => {
 		}
 	};
 
+	const checkoutHandler = () => {
+		dispatchCartAction({ type: "CLEAR_ITEMS" });
+		alert("Checkout successful!");
+		closeModal();
+	};
+
 	const openModal = () => {
 		if (modalRef.current) {
 			modalRef.current.showModal();
@@ -87,7 +94,11 @@ const App = () => {
 
 	return (
 		<CartContextProvider value={cartContextValue}>
-			<Modal ref={modalRef} onCloseModal={closeModal}></Modal>
+			<Modal
+				ref={modalRef}
+				onCloseModal={closeModal}
+				onCheckout={checkoutHandler}
+			></Modal>
 
 			<Header onModalOpen={openModal} />
 			<main>

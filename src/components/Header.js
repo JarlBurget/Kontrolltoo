@@ -1,34 +1,29 @@
-import logo from '../assets/logo.jpg'
-import Button from './UI/Button'
+import logo from "../assets/logo.jpg";
+import Button from "./UI/Button";
 
-import { useContext } from 'react' 
-import CartContext from '../store/CartContext'
+import { useContext } from "react";
+import CartContext from "../store/CartContext";
 
-const Header = ({ onModalOpen}) => {
-    const cartctx = useContext(CartContext);
-    const totalItems = cartctx.items.reduce((sum, item) => sum + item.quantity, 0);
-    console.log(cartctx.items)
-    return (
-        <div>
-            <header id="main-header">
-                <div id="title">
-                    <img src={logo}/>
-                    <h1>React Food Order App</h1>
-                    
-                </div>
-            <nav>
-            <Button 
-            onClick={onModalOpen}
-            textOnly={true}
-            >Cart ({cartctx.items.length})
-            </Button>
+const Header = ({ onModalOpen }) => {
+	const cartCtx = useContext(CartContext);
+	const totalItems = cartCtx.items.reduce(
+		(total, item) => total + item.quantity,
+		0
+	);
 
-            </nav>
-        </header>
-        <ul id="meals">
-        </ul>
-        </div>
-    )
-}
+	return (
+		<header id='main-header'>
+			<div id='title'>
+				<img src={logo} alt='Logo' />
+				<h1>React Food Order App</h1>
+			</div>
+			<nav>
+				<Button onClick={onModalOpen} textOnly={true}>
+					Cart ({totalItems})
+				</Button>
+			</nav>
+		</header>
+	);
+};
 
-export default Header
+export default Header;
